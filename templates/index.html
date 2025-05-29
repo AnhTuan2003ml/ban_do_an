@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống đặt đồ ăn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden {
+            display: none;
+        }
+        .food-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .cart-item {
+            background-color: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">Food Order System</a>
+            <div class="navbar-nav ms-auto">
+                <div id="userInfo" class="hidden">
+                    <span class="text-light me-3">Xin chào, <span id="username"></span></span>
+                    <button class="btn btn-outline-light" onclick="logout()">Đăng xuất</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Form đăng nhập -->
+        <div id="loginForm" class="card p-4">
+            <h2>Đăng nhập</h2>
+            <form onsubmit="return login(event)">
+                <div class="mb-3">
+                    <label class="form-label">Tên đăng nhập</label>
+                    <input type="text" class="form-control" id="loginUsername" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" class="form-control" id="loginPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                <button type="button" class="btn btn-link" onclick="showRegister()">Chưa có tài khoản? Đăng ký</button>
+            </form>
+        </div>
+
+        <!-- Form đăng ký -->
+        <div id="registerForm" class="card p-4 hidden">
+            <h2>Đăng ký</h2>
+            <form onsubmit="return register(event)">
+                <div class="mb-3">
+                    <label class="form-label">Tên đăng nhập</label>
+                    <input type="text" class="form-control" id="registerUsername" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" id="registerEmail" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Mật khẩu</label>
+                    <input type="password" class="form-control" id="registerPassword" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Đăng ký</button>
+                <button type="button" class="btn btn-link" onclick="showLogin()">Đã có tài khoản? Đăng nhập</button>
+            </form>
+        </div>
+
+        <!-- Trang chủ sau khi đăng nhập -->
+        <div id="homePage" class="hidden">
+            <div class="row">
+                <!-- Danh sách đồ ăn -->
+                <div class="col-md-8">
+                    <h2>Danh sách đồ ăn</h2>
+                    <div id="foodList" class="row"></div>
+                </div>
+                <!-- Giỏ hàng -->
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>Giỏ hàng</h3>
+                        </div>
+                        <div class="card-body">
+                            <div id="cartItems"></div>
+                            <div class="mt-3">
+                                <strong>Tổng tiền: </strong>
+                                <span id="totalAmount">0</span> VNĐ
+                            </div>
+                            <button class="btn btn-success mt-3" onclick="checkout()">Thanh toán</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://127.0.0.1:5001/api';
+        let currentUser = null;
+
+        // Hiển thị form đăng ký
+        function showRegister() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registerForm').classList.remove('hidden');
+        }
+
+        // Hiển thị form đăng nhập
+        function showLogin() {
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        // Đăng ký
+        async function register(event) {
+            event.preventDefault();
+            const username = document.getElementById('registerUsername').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password })
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Đăng ký thành công!');
+                    showLogin();
+                } else {
+                    alert(data.error || 'Đăng ký thất bại');
+                }
+            } catch (error) {
+                alert('Lỗi kết nối server');
+            }
+        }
+
+        // Đăng nhập
+        async function login(event) {
+            event.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    currentUser = username;
+                    document.getElementById('username').textContent = username;
+                    document.getElementById('loginForm').classList.add('hidden');
+                    document.getElementById('userInfo').classList.remove('hidden');
+                    document.getElementById('homePage').classList.remove('hidden');
+                    loadFoods();
+                    loadCart();
+                } else {
+                    alert(data.error || 'Đăng nhập thất bại');
+                }
+            } catch (error) {
+                alert('Lỗi kết nối server');
+            }
+        }
+
+        // Đăng xuất
+        function logout() {
+            currentUser = null;
+            document.getElementById('userInfo').classList.add('hidden');
+            document.getElementById('homePage').classList.add('hidden');
+            document.getElementById('loginForm').classList.remove('hidden');
+        }
+
+        // Tải danh sách đồ ăn
+        async function loadFoods() {
+            try {
+                const response = await fetch(`${API_URL}/foods`);
+                const foods = await response.json();
+                const foodList = document.getElementById('foodList');
+                foodList.innerHTML = '';
+
+                for (const [id, food] of Object.entries(foods)) {
+                    const foodItem = document.createElement('div');
+                    foodItem.className = 'col-md-6 mb-3';
+                    foodItem.innerHTML = `
+                        <div class="food-item">
+                            <h4>${food.name}</h4>
+                            <p>Giá: ${food.price} VNĐ</p>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="quantity_${id}" 
+                                       min="1" value="1">
+                                <button class="btn btn-primary" onclick="addToCart('${id}')">
+                                    Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    foodList.appendChild(foodItem);
+                }
+            } catch (error) {
+                alert('Lỗi khi tải danh sách đồ ăn');
+            }
+        }
+
+        // Tải giỏ hàng
+        async function loadCart() {
+            if (!currentUser) return;
+            
+            try {
+                const response = await fetch(`${API_URL}/user/${currentUser}/orders`);
+                const data = await response.json();
+                const cartItems = document.getElementById('cartItems');
+                cartItems.innerHTML = '';
+                let total = 0;
+
+                for (const item of data.items) {
+                    const cartItem = document.createElement('div');
+                    cartItem.className = 'cart-item';
+                    cartItem.innerHTML = `
+                        <div class="d-flex justify-content-between">
+                            <span>${item.name}</span>
+                            <span>${item.price} VNĐ x ${item.quantity}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mt-2">
+                            <span>Tổng: ${item.total} VNĐ</span>
+                            <button class="btn btn-sm btn-danger" onclick="removeFromCart('${item.food_id}')">
+                                Xóa
+                            </button>
+                        </div>
+                    `;
+                    cartItems.appendChild(cartItem);
+                    total += item.total;
+                }
+
+                document.getElementById('totalAmount').textContent = total;
+            } catch (error) {
+                alert('Lỗi khi tải giỏ hàng');
+            }
+        }
+
+        // Thêm vào giỏ hàng
+        async function addToCart(foodId) {
+            if (!currentUser) return;
+
+            const quantity = document.getElementById(`quantity_${foodId}`).value;
+            try {
+                const response = await fetch(`${API_URL}/user/${currentUser}/order/add`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ food_id: foodId, quantity: parseInt(quantity) })
+                });
+                
+                if (response.ok) {
+                    loadCart();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Lỗi khi thêm vào giỏ hàng');
+                }
+            } catch (error) {
+                alert('Lỗi kết nối server');
+            }
+        }
+
+        // Xóa khỏi giỏ hàng
+        async function removeFromCart(foodId) {
+            if (!currentUser) return;
+
+            try {
+                const response = await fetch(`${API_URL}/user/${currentUser}/order/remove`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ food_id: foodId })
+                });
+                
+                if (response.ok) {
+                    loadCart();
+                } else {
+                    const data = await response.json();
+                    alert(data.error || 'Lỗi khi xóa khỏi giỏ hàng');
+                }
+            } catch (error) {
+                alert('Lỗi kết nối server');
+            }
+        }
+
+        // Thanh toán
+        function checkout() {
+            alert('Chức năng thanh toán đang được phát triển!');
+        }
+    </script>
+</body>
+</html> 

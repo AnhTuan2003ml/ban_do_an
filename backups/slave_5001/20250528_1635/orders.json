@@ -1,0 +1,42 @@
+{
+    "Tuan2003ml": {
+        "items": [
+            {
+                "food_id": "1",
+                "name": "Phở bò",
+                "price": 50000,
+                "quantity": 22,
+                "total": 1100000
+            },
+            {
+                "food_id": "3",
+                "name": "Bún chả",
+                "price": 40000,
+                "quantity": 11,
+                "total": 440000
+            },
+            {
+                "food_id": "5",
+                "name": "Cà phê sữa",
+                "price": 20000,
+                "quantity": 4,
+                "total": 80000
+            },
+            {
+                "food_id": "4",
+                "name": "Trà đào",
+                "price": 25000,
+                "quantity": 3,
+                "total": 75000
+            },
+            {
+                "food_id": "2",
+                "name": "Cơm sườn",
+                "price": 45000,
+                "quantity": 3,
+                "total": 135000
+            }
+        ],
+        "total": 1830000
+    }
+}

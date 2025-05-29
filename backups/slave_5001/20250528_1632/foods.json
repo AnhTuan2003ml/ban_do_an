@@ -1,0 +1,32 @@
+{
+    "1": {
+        "name": "Phở bò",
+        "price": 50000,
+        "description": "Phở bò truyền thống",
+        "category": "Món chính"
+    },
+    "2": {
+        "name": "Cơm sườn",
+        "price": 45000,
+        "description": "Cơm sườn nướng",
+        "category": "Món chính"
+    },
+    "3": {
+        "name": "Bún chả",
+        "price": 40000,
+        "description": "Bún chả Hà Nội",
+        "category": "Món chính"
+    },
+    "4": {
+        "name": "Trà đào",
+        "price": 25000,
+        "description": "Trà đào mát lạnh",
+        "category": "Đồ uống"
+    },
+    "5": {
+        "name": "Cà phê sữa",
+        "price": 20000,
+        "description": "Cà phê sữa đậm đà",
+        "category": "Đồ uống"
+    }
+}
