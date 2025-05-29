@@ -26,7 +26,7 @@ python slave.py 5002
 ## 4️⃣ Chạy Test Script
 Sau khi các node đã chạy, kiểm tra hệ thống bằng cách chạy test:
 ```sh
-python test.py
+python auto_test.py
 ```
 
 Test script sẽ:
